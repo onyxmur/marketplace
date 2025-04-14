@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+    <div class="jumbotron mt">
+        <h1 class="display my">Добро пожаловать!</h1>
+        <hr class="my-4">
+        {% if 'username' not in session %}
+            <p>войдите или зарегистрируйтесь</p>
+            <div class="mt-4">
+                <a class="btn btn-primary btn-lg mr-3" href="{{ url_for('login') }}" role="button">Войти</a>
+                <a class="btn btn-success btn-lg" href="{{ url_for('register') }}" role="button">Зарегистрироваться</a>
+            </div>
+        {% else %}
+            <p>Вы вошли как {{ session['username'] }}.</p>
+            <a class="btn btn-info btn-lg" href="{{ url_for('logout') }}" role="button">Выйти</a>
+        {% endif %}
+    </div>
+{% endblock %}

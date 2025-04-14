@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <img src="{{ url_for('static', filename='images/' + product.image) }}" 
+                 class="img-fluid rounded" 
+                 alt="{{ product.name }}">
+        </div>
+        <div class="col-md-6">
+            <h1>{{ product.name }}</h1>
+            <h3 class="text-primary my-3">{{ product.price }} ₽</h3>
+            <p class="lead">{{ product.description }}</p>
+            
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary btn-lg">Добавить в корзину</button>
+                <a href="{{ url_for('market') }}" class="btn btn-outline-secondary btn-lg">Назад</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}</title>
+</head>
+<body>
+
+</body>
+</html>
