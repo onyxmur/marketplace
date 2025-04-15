@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}корзина{% endblock %}
+
+{% block content %}
+
+{% if products %}
+<div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+    <h1 class="mb-0">корзина</h1>
+    <form method="POST" action="{{ url_for('cart') }}" class="ms-auto">
+        <button type="submit" name="remove_selected" class="btn btn-outline-danger">удалить выбранное</button>
+    </form>
+</div>
+
+<form method="POST" action="{{ url_for('cart') }}">
+    <div class="row gy-4">
+        {% for product in products %}
+        <div class="col-12">
+            <div class="card shadow-lg border-0 rounded-4 p-3">
+                <div class="row g-0 align-items-center">
+                    <div class="col-md-1 text-center d-flex justify-content-center align-items-center">
+                        <label>
+                            <input type="checkbox" name="selected_products" value="{{ product.id }}"
+                                   class="form-check-input"
+                                   style="width: 35px; height: 35px; cursor: pointer;"
+                                   {% if product.id|string in selected_products %}checked{% endif %}>
+                        </label>
+                    </div>
+                    <div class="col-md-2 text-center p-2">
+                        <img src="{{ product.image_url }}" alt="{{ product.name }}"
+                             class="img-fluid rounded-3"
+                             style="height: 170px; object-fit: cover;">
+                    </div>
+                    <div class="col-md-5 p-3">
+                        <h5 class="fw-bold">{{ product.name }}</h5>
+                        <p class="text-muted small mb-2">{{ product.description }}</p>
+                        <p class="mb-0">цена за штуку: <strong>{{ product.price }} ₽</strong></p>
+                    </div>
+                    <div class="col-md-4 p-3 text-end">
+                        <div class="d-flex justify-content-end align-items-center mb-3">
+                            <button type="submit" name="decrease" value="{{ product.id }}"
+                                    class="btn btn-outline-warning btn-sm me-2">−
+                            </button>
+
+                            <span class="fw-bold me-2">{{ product_counts.get(product.id, 1) }}</span>
+
+                            <button type="submit" name="increase" value="{{ product.id }}"
+                                    class="btn btn-outline-success btn-sm me-2">+
+                            </button>
+
+                            <button type="submit" name="remove" value="{{ product.id }}"
+                                    class="btn btn-outline-danger btn-sm">Удалить
+                            </button>
+                        </div>
+                        <p class="fw-bold mb-0">итого: {{ product.price * product_counts.get(product.id, 1) }} ₽</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="d-flex justify-content-end mt-4">
+        <button type="submit" name="remove_selected" class="btn btn-outline-danger btn-lg shadow-lg rounded-4">
+            удалить выбранное
+        </button>
+    </div>
+
+    <div class="d-flex justify-content-end mt-4">
+        <button type="submit" name="order_selected" class="btn btn-primary btn-lg shadow-lg rounded-4">
+            оформить заказ на выбранное
+        </button>
+    </div>
+</form>
+
+{% else %}
+<h1 class="mb-4 mt-4">корзина</h1>
+<div class="alert alert-info">ваша корзина пуста.</div>
+{% endif %}
+
+{% endblock %}

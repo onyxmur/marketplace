@@ -2,24 +2,30 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2>Добро пожаловать на маркетплейс, {{ username }}!</h2>
+    <h2>добро пожаловать на маркетплейс, {{ username }}!</h2>
 
     <div class="row mt-4">
         {% for product in products %}
         <div class="col-md-4 mb-4">
             <div class="card h-100">
                 <a href="{{ url_for('product', product_id=product.id) }}" class="text-decoration-none text-dark">
-                    <img src="{{ url_for('static', filename='images/' + product.image) }}"
+                    <img src="{{ product.image_url }}"
                          class="card-img-top"
                          alt="{{ product.name }}"
                          style="height: 200px; object-fit: contain;">
                     <div class="card-body">
                         <h5 class="card-title">{{ product.name }}</h5>
                         <h4 class="text-primary">{{ product.price }} ₽</h4>
+                        <p class="card-text"><strong>продавец:</strong> {{ product.owner }}</p>
+                        <p class="card-text"><strong>категория:</strong> {{ product.category }}</p>
+                        <p class="card-text"><strong>рейтинг:</strong> {{ product.rating }}</p>
                     </div>
                 </a>
                 <div class="card-footer">
-                    <button class="btn btn-primary w-100">Добавить в корзину</button>
+                    <form method="POST" action="{{ url_for('market') }}" onsubmit="sendForm(event)">
+                        <input type="hidden" name="product_id" value="{{ product.id }}">
+                        <button type="submit" class="btn btn-primary w-100">добавить в корзину</button>
+                    </form>
                 </div>
             </div>
         </div>
