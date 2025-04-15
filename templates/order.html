@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}оформление заказа{% endblock %}
+
+{% block content %}
+<div class="mt-4 mb-4">
+    <h2 class="fw-bold">оформление заказа</h2>
+</div>
+
+<form method="POST" action="{{ url_for('order') }}" class="p-3 bg-light rounded shadow-sm">
+    <div class="mb-4">
+        <label for="city" class="form-label fw-semibold">город доставки:</label>
+        <input type="text" class="form-control" list="cityOptions" id="city" name="city" placeholder="например, тюмень" required>
+        <datalist id="cityOptions">
+            <option value="москва">
+            <option value="санкт-петербург">
+            <option value="тюмень">
+            <option value="новосибирск">
+            <option value="екатеринбург">
+            <option value="казань">
+        </datalist>
+    </div>
+
+    <div class="mb-4">
+        <h5>получатель: <span class="fw-normal">{{ name }}</span></h5>
+        <h5>оплата: <span class="fw-normal">при получении</span></h5>
+    </div>
+
+    <h4 class="mb-3">ваши товары:</h4>
+    <div class="d-flex flex-wrap gap-3 justify-content-start">
+        {% for product in products %}
+        <div class="card border-0 shadow-sm" style="width: 130px;">
+            <img src="{{ product.image_url }}" class="card-img-top rounded-top" alt="{{ product.name }}" style="height: 100px; object-fit: cover;">
+            <div class="card-body p-2 text-center">
+                <p class="mb-1"><span style="white-space: nowrap;">{{ product.price|format_price }} ₽/шт</span></p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="mt-5">
+        <h4 class="mb-3">итог заказа:</h4>
+        <div class="table-responsive">
+            <table class="table align-middle table-bordered table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>товар</th>
+                        <th>цена за шт.</th>
+                        <th>кол-во</th>
+                        <th>сумма</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    {% set quantity = product_counts[product.id] %}
+                    {% set subtotal = product.price * quantity %}
+                    <tr>
+                        <td>{{ product.name }}</td>
+                        <td><span style="white-space: nowrap;">{{ product.price|format_price }} ₽</span></td>
+                        <td>{{ quantity }}</td>
+                        <td><span style="white-space: nowrap;">{{ subtotal|format_price }} ₽</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="text-end">
+            <h4>общая сумма: <span class="text-success fw-bold">{{ total }} ₽</span></h4>
+        </div>
+    </div>
+
+    <div class="mt-4 text-end">
+        <button type="submit" class="btn btn-lg btn-success shadow">подтвердить заказ</button>
+    </div>
+</form>
+{% endblock %}

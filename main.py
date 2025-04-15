@@ -16,6 +16,7 @@ db = SQLAlchemy(app)
 
 
 class User(db.Model):  # пользователь
+    __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
@@ -35,6 +36,24 @@ class Products(db.Model):  # товар
     price = db.Column(db.Integer)
 
 
+class Orders(db.Model):
+    __tablename__ = 'orders'
+
+    id = db.Column(db.Integer, primary_key=True)
+    city = db.Column(db.String(100), nullable=False)
+    total = db.Column(db.Integer, nullable=False)
+    products = db.Column(db.Text, nullable=False)
+    man_id = db.Column(db.Integer, nullable=False)
+
+
+@app.template_filter('format_price')
+def format_price(value):
+    try:
+        return f"{int(value):,}".replace(',', ' ')
+    except (ValueError, TypeError):
+        return value
+
+
 @app.route('/')
 def index():
     if 'username' in session:
@@ -44,6 +63,8 @@ def index():
 
 @app.route('/market', methods=['GET', 'POST'])
 def market():
+    if 'username' not in session:
+        return redirect(url_for('login'))
     if request.method == 'POST':
         product_id = request.form.get('product_id')
         user = User.query.filter_by(id=session['id']).first()
@@ -63,12 +84,22 @@ def market():
                            categories=categories, username=session['username'])
 
 
-@app.route('/product/<int:product_id>')
+@app.route('/product/<int:product_id>', methods=['GET', 'POST'])
 def product(product_id):
     if 'username' not in session:
         return redirect(url_for('login'))
 
     product = Products.query.get_or_404(product_id)
+    if request.method == 'POST':
+        product_id = str(product.id)
+        user = User.query.filter_by(id=session['id']).first()
+        print(123)
+        if len(user.in_cart) > 0:
+            user.in_cart += ' ' + product_id
+        else:
+            user.in_cart = product_id
+        db.session.commit()
+
     return render_template('product.html', product=product)
 
 
@@ -85,9 +116,7 @@ def cart():
 
     if request.method == 'POST':
         selected_products = request.form.getlist('selected_products')
-
-        if 'remove_selected' not in request.form:
-            session['selected_products'] = selected_products
+        session['selected_products'] = selected_products
 
         if 'increase' in request.form:
             product_id = request.form['increase']
@@ -110,16 +139,22 @@ def cart():
                 session['selected_products'].remove(product_id)
 
         elif 'remove_selected' in request.form:
-            selected_to_remove = session.get('selected_products', [])
-            if selected_to_remove:
-                user.in_cart = ' '.join([p for p in user.in_cart.split() if p not in selected_to_remove])
+            selected_to_ord = session.get('selected_products', [])
+            print(selected_to_ord)
+            if selected_to_ord:
+                session['order_products'] = selected_to_ord
+                selected_ids1 = session.get('order_products', [])
+                user.in_cart = ' '.join([p for p in user.in_cart.split() if p not in selected_ids1])
+                db.session.commit()
                 flash('выбранные товары удалены из корзины', 'info')
+
 
         elif 'order_selected' in request.form:
             selected_to_ord = session.get('selected_products', [])
+            print(selected_to_ord)
             if selected_to_ord:
-                user.in_cart = ' '.join([p for p in user.in_cart.split() if p not in selected_to_ord])
-                return redirect(url_for('ord'))
+                session['order_products'] = selected_to_ord
+                return redirect(url_for('order'))
 
         db.session.commit()
         return redirect(url_for('cart'))
@@ -132,12 +167,73 @@ def cart():
     return render_template('cart.html',
                            products=products,
                            product_counts=product_counts,
-                           selected_products=selected_products)
+                           selected_products=selected_products, total=1)
 
 
-# @app.route('/ord', methods=['GET', 'POST'])
-# def register():
-#     return render_template('register.html')
+@app.route('/order', methods=['GET', 'POST'])
+def order():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    selected_ids1 = session.get('order_products', [])
+    selected_ids = [int(x) for x in selected_ids1]
+
+    products = Products.query.filter(Products.id.in_(selected_ids)).all()
+
+    user = User.query.filter_by(id=session['id']).first()
+
+    counts = user.in_cart.split() if user.in_cart else []
+    product_counts = dict(Counter(counts))
+    product_counts = {int(key): int(value) for key, value in product_counts.items() if int(key) in selected_ids}
+    total = 0
+    for key, value in product_counts.items():
+        total += value * Products.query.filter_by(id=key).first().price
+
+    if request.method == 'POST':
+        city = request.form.get('city')
+        new_order = Orders(
+            city=city,
+            total=total,
+            products=' '.join(','.join([str(key), str(value)]) for key, value in product_counts.items()),
+            man_id=session['id']
+        )
+        db.session.add(new_order)
+        user.in_cart = ' '.join([p for p in user.in_cart.split() if p not in selected_ids1])
+        db.session.commit()
+        return redirect(url_for('orders'))
+
+    return render_template('order.html', name=session['username'], products=products, product_counts=product_counts,
+                           total=total)
+
+
+@app.route('/orders')
+def orders():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    orders = Orders.query.filter_by(man_id=session['id']).all()
+    return render_template('orders.html', orders=orders, Products=Products, int=int)
+
+
+@app.route('/order/<int:order_id>', methods=['GET', 'POST'])
+def order_details(order_id):
+    order = Orders.query.get_or_404(order_id)
+
+    user = User.query.filter_by(id=order.man_id).first()
+
+    if request.method == 'POST' and 'cancel' in request.form:
+        db.session.delete(order)
+        db.session.commit()
+        flash('dаш заказ был отменен', 'success')
+        return redirect(url_for('orders'))
+
+    product_counts = {}
+    for product_info in order.products.split():
+        product_id, quantity = map(int, product_info.split(','))
+        product_counts[product_id] = quantity
+
+    return render_template('about_order.html', order=order, name=user.username, product_counts=product_counts,
+                           Products=Products)
 
 
 @app.route('/register', methods=['GET', 'POST'])

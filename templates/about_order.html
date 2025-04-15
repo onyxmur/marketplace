@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}детали заказа №{{ order.id }}{% endblock %}
+
+{% block content %}
+<h2 class="mt-4 mb-4">детали заказа №{{ order.id }}</h2>
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <p><strong>имя пользователя:</strong> {{ name }}</p>
+            <p><strong>город доставки:</strong> {{ order.city }}</p>
+            <p><strong>итоговая сумма:</strong> {{ order.total|format_price }} ₽</p>
+        </div>
+    </div>
+
+    <h3>товары в заказе</h3>
+    <div class="row">
+        {% for product_id, quantity in product_counts.items() %}
+        {% set product = Products.query.get(product_id) %}
+        <div class="col-md-3">
+            <div class="card mb-4 shadow-sm">
+                <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}"
+                     style="height: 200px; object-fit: contain;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">цена за шт: {{ product.price|format_price }} ₽</p>
+                    <p class="card-text">кол-во: {{ quantity }}</p>
+                    <p class="card-text"><strong>сумма: {{ (product.price * quantity)|format_price }} ₽</strong></p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <h3>детали заказа</h3>
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th scope="col">товар</th>
+            <th scope="col">цена за шт</th>
+            <th scope="col">кол-во</th>
+            <th scope="col">сумма</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for product_id, quantity in product_counts.items() %}
+        {% set product = Products.query.get(product_id) %}
+        <tr>
+            <td>{{ product.name }}</td>
+            <td>{{ product.price|format_price }} ₽</td>
+            <td>{{ quantity }}</td>
+            <td>{{ (product.price * quantity)|format_price }} ₽</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="mt-4">
+        <a href="{{ url_for('orders') }}" class="btn btn-secondary">назад</a>
+        <form action="{{ url_for('order_details', order_id=order.id) }}" method="POST" class="d-inline">
+    <button type="submit" name="cancel" class="btn btn-danger">отменить заказ</button>
+</form>
+
+    </div>
+</div>
+{% endblock %}

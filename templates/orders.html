@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}заказы{% endblock %}
+
+{% block content %}
+<h2 class="mt-4 mb-4">мои заказы</h2>
+
+<div class="list-group">
+    {% for order in orders %}
+    <a href="{{ url_for('order_details', order_id=order.id) }}" class="list-group-item list-group-item-action">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h5>заказ №{{ order.id }}</h5>
+                <p><strong>город доставки:</strong> {{ order.city }}</p>
+                <p><strong>итоговая сумма:</strong> <span
+                        style="white-space: nowrap;">{{ order.total|format_price }} ₽</span></p>
+
+            </div>
+
+            <div class="d-flex flex-wrap justify-content-end">
+                {% for product in order.products.split() %}
+                {% set prod_id, prod_qty = product.split(',') %}
+                {% set prod = Products.query.get(int(prod_id)) %}
+                <div class="card m-2 shadow-sm" style="width: 140px;">
+                    <img src="{{ prod.image_url }}" class="card-img-top" alt="{{ prod.name }}"
+                         style="height: 80px; object-fit: contain;">
+                    <div class="card-body p-2">
+                        <p class="card-text text-center mb-1" style="font-size: 0.85rem;">{{ prod.name }}</p>
+                        <p class="card-text text-center mb-1" style="font-size: 0.85rem;"><span
+                        style="white-space: nowrap;">{{ prod.price|format_price }} ₽/шт</span></p>
+                        <p class="card-text text-center mb-0" style="font-size: 0.85rem;">кол-во: {{ prod_qty }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+
+{% endblock %}

@@ -15,7 +15,7 @@
                          style="height: 200px; object-fit: contain;">
                     <div class="card-body">
                         <h5 class="card-title">{{ product.name }}</h5>
-                        <h4 class="text-primary">{{ product.price }} ₽</h4>
+                        <h4 class="text-primary"><span style="white-space: nowrap;">{{ product.price|format_price }} ₽</span></h4>
                         <p class="card-text"><strong>продавец:</strong> {{ product.owner }}</p>
                         <p class="card-text"><strong>категория:</strong> {{ product.category }}</p>
                         <p class="card-text"><strong>рейтинг:</strong> {{ product.rating }}</p>

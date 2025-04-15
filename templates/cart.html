@@ -7,9 +7,12 @@
 {% if products %}
 <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
     <h1 class="mb-0">корзина</h1>
-    <form method="POST" action="{{ url_for('cart') }}" class="ms-auto">
-        <button type="submit" name="remove_selected" class="btn btn-outline-danger">удалить выбранное</button>
-    </form>
+</div>
+
+<div class="mb-4">
+    <button type="button" class="btn btn-outline-secondary btn-lg shadow-lg rounded-4" id="toggle-select-all">
+        выделить все
+    </button>
 </div>
 
 <form method="POST" action="{{ url_for('cart') }}">
@@ -21,7 +24,7 @@
                     <div class="col-md-1 text-center d-flex justify-content-center align-items-center">
                         <label>
                             <input type="checkbox" name="selected_products" value="{{ product.id }}"
-                                   class="form-check-input"
+                                   class="form-check-input cart-checkbox"
                                    style="width: 35px; height: 35px; cursor: pointer;"
                                    {% if product.id|string in selected_products %}checked{% endif %}>
                         </label>
@@ -34,7 +37,7 @@
                     <div class="col-md-5 p-3">
                         <h5 class="fw-bold">{{ product.name }}</h5>
                         <p class="text-muted small mb-2">{{ product.description }}</p>
-                        <p class="mb-0">цена за штуку: <strong>{{ product.price }} ₽</strong></p>
+                        <p class="mb-0">цена за штуку: <strong><span style="white-space: nowrap;">{{ product.price|format_price }} ₽</span></strong></p>
                     </div>
                     <div class="col-md-4 p-3 text-end">
                         <div class="d-flex justify-content-end align-items-center mb-3">
@@ -52,7 +55,7 @@
                                     class="btn btn-outline-danger btn-sm">Удалить
                             </button>
                         </div>
-                        <p class="fw-bold mb-0">итого: {{ product.price * product_counts.get(product.id, 1) }} ₽</p>
+                        <p class="fw-bold mb-0"><span style="white-space: nowrap;">итого: {{ (product.price * product_counts.get(product.id, 1))|format_price }} ₽</span></p>
                     </div>
                 </div>
             </div>
@@ -60,7 +63,7 @@
         {% endfor %}
     </div>
 
-    <div class="d-flex justify-content-end mt-4">
+    <div class="d-flex justify-content-between mt-4">
         <button type="submit" name="remove_selected" class="btn btn-outline-danger btn-lg shadow-lg rounded-4">
             удалить выбранное
         </button>
@@ -71,11 +74,20 @@
             оформить заказ на выбранное
         </button>
     </div>
+
+    <div class="d-flex justify-content-end mt-4">
+        <div class="fw-bold fs-4">
+            итого: <span>{{ total|format_price }} ₽</span>
+        </div>
+    </div>
 </form>
 
 {% else %}
 <h1 class="mb-4 mt-4">корзина</h1>
 <div class="alert alert-info">ваша корзина пуста.</div>
 {% endif %}
+
+{% block scripts %}
+{% endblock %}
 
 {% endblock %}
