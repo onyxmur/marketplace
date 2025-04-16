@@ -14,6 +14,7 @@
                 <p><strong>город доставки:</strong> {{ order.city }}</p>
                 <p><strong>итоговая сумма:</strong> <span
                         style="white-space: nowrap;">{{ order.total|format_price }} ₽</span></p>
+                <p><strong>дата заказа:</strong> {{ order.formated_date }}</p>
 
             </div>
 
@@ -27,7 +28,7 @@
                     <div class="card-body p-2">
                         <p class="card-text text-center mb-1" style="font-size: 0.85rem;">{{ prod.name }}</p>
                         <p class="card-text text-center mb-1" style="font-size: 0.85rem;"><span
-                        style="white-space: nowrap;">{{ prod.price|format_price }} ₽/шт</span></p>
+                                style="white-space: nowrap;">{{ prod.price|format_price }} ₽/шт</span></p>
                         <p class="card-text text-center mb-0" style="font-size: 0.85rem;">кол-во: {{ prod_qty }}</p>
                     </div>
                 </div>

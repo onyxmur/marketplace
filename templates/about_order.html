@@ -11,6 +11,7 @@
             <p><strong>имя пользователя:</strong> {{ name }}</p>
             <p><strong>город доставки:</strong> {{ order.city }}</p>
             <p><strong>итоговая сумма:</strong> {{ order.total|format_price }} ₽</p>
+            <p><strong>дата заказа:</strong> {{ order.formated_date }}</p>
         </div>
     </div>
 
@@ -59,8 +60,8 @@
     <div class="mt-4">
         <a href="{{ url_for('orders') }}" class="btn btn-secondary">назад</a>
         <form action="{{ url_for('order_details', order_id=order.id) }}" method="POST" class="d-inline">
-    <button type="submit" name="cancel" class="btn btn-danger">отменить заказ</button>
-</form>
+            <button type="submit" name="cancel" class="btn btn-danger">отменить заказ</button>
+        </form>
 
     </div>
 </div>

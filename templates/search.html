@@ -1,13 +1,15 @@
 {% extends "base.html" %}
 
+{% block title %}результаты поиска{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
-    <h2>добро пожаловать на маркетплейс</h2>
+    <h2>результаты поиска по запросу: «{{ query }}»</h2>
 
-    <form method="GET" action="{{ url_for('market') }}">
+    <form method="GET" action="{{ url_for('search', query=query) }}">
         <div class="row mb-4">
             <div class="col-md-3">
-                <label for="category_filter" class="form-label">выберите категорию</label>
+                <label for="category_filter" class="form-label">категория</label>
                 <select id="category_filter" name="category" class="form-select" onchange="this.form.submit()">
                     <option value="">все категории</option>
                     {% for category in categories %}
@@ -19,7 +21,7 @@
             </div>
 
             <div class="col-md-3">
-                <label for="seller_filter" class="form-label">фильтр по продавцу</label>
+                <label for="seller_filter" class="form-label">продавец</label>
                 <select id="seller_filter" name="seller" class="form-select" onchange="this.form.submit()">
                     <option value="">все продавцы</option>
                     {% for seller in owners %}
@@ -32,7 +34,6 @@
             <div class="col-md-3">
                 <label for="price_min" class="form-label">цена</label>
                 <div class="d-flex">
-                    <span class="mx-2">от</span>
                     <input type="number" id="price_min" name="price_min" class="form-control" placeholder="от"
                            value="{{ price_min }}" onchange="this.form.submit()">
                     <span class="mx-2">до</span>
@@ -55,20 +56,13 @@
                     <option value="id" {% if sort_filter=='id' %}selected{% endif %}>по id</option>
                     <option value="price" {% if sort_filter=='price' %}selected{% endif %}>по цене</option>
                     <option value="rating" {% if sort_filter=='rating' %}selected{% endif %}>по рейтингу</option>
-
                 </select>
             </div>
         </div>
     </form>
 
+    {% if products %}
     <div class="row mt-4">
-        {% if products|length == 0 %}
-        <div class="col-12">
-            <div class="alert alert-warning text-center" role="alert">
-                товары не найдены. попробуйте изменить фильтры
-            </div>
-        </div>
-        {% else %}
         {% for product in products %}
         <div class="col-md-4 mb-4">
             <div class="card h-100">
@@ -88,7 +82,7 @@
                     {% if product.id in product_counts %}
                     <div class="d-flex align-items-center justify-content-between">
                         <form method="POST"
-                              action="{{ url_for('market', category=selected_category, seller=selected_seller, price_min=price_min, price_max=price_max, rating_min=rating_min, rating_max=rating_max, sort=sort_filter) }}"
+                              action="{{ url_for('search', query=query, category=selected_category, seller=selected_seller, price_min=price_min, price_max=price_max, rating_min=rating_min, rating_max=rating_max, sort=sort_filter) }}"
                               class="d-inline">
                             <input type="hidden" name="product_id" value="{{ product.id }}">
                             <button name="decrease" value="{{ product.id }}" type="submit"
@@ -99,7 +93,7 @@
                         <span>{{ product_counts[product.id] }} шт.</span>
 
                         <form method="POST"
-                              action="{{ url_for('market', category=selected_category, seller=selected_seller, price_min=price_min, price_max=price_max, rating_min=rating_min, rating_max=rating_max, sort=sort_filter) }}"
+                              action="{{ url_for('search', query=query, category=selected_category, seller=selected_seller, price_min=price_min, price_max=price_max, rating_min=rating_min, rating_max=rating_max, sort=sort_filter) }}"
                               class="d-inline">
                             <input type="hidden" name="product_id" value="{{ product.id }}">
                             <button name="increase" value="{{ product.id }}" type="submit"
@@ -108,7 +102,7 @@
                         </form>
 
                         <form method="POST"
-                              action="{{ url_for('market', category=selected_category, seller=selected_seller, price_min=price_min, price_max=price_max, rating_min=rating_min, rating_max=rating_max, sort=sort_filter) }}"
+                              action="{{ url_for('search', query=query, category=selected_category, seller=selected_seller, price_min=price_min, price_max=price_max, rating_min=rating_min, rating_max=rating_max, sort=sort_filter) }}"
                               class="d-inline">
                             <input type="hidden" name="product_id" value="{{ product.id }}">
                             <button name="remove" value="{{ product.id }}" type="submit" class="btn btn-outline-danger">
@@ -118,7 +112,7 @@
                     </div>
                     {% else %}
                     <form method="POST"
-                          action="{{ url_for('market', category=selected_category, seller=selected_seller, price_min=price_min, price_max=price_max, rating_min=rating_min, rating_max=rating_max, sort=sort_filter) }}">
+                          action="{{ url_for('search', query=query, category=selected_category, seller=selected_seller, price_min=price_min, price_max=price_max, rating_min=rating_min, rating_max=rating_max, sort=sort_filter) }}">
                         <input type="hidden" name="product_id" value="{{ product.id }}">
                         <button type="submit" class="btn btn-primary w-100">добавить в корзину</button>
                     </form>
@@ -127,7 +121,9 @@
             </div>
         </div>
         {% endfor %}
-        {% endif %}
     </div>
+    {% else %}
+    <div class="alert alert-warning">товары по запросу не найдены</div>
+    {% endif %}
 </div>
 {% endblock %}
