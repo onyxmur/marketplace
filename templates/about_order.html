@@ -3,7 +3,18 @@
 {% block title %}детали заказа №{{ order.id }}{% endblock %}
 
 {% block content %}
-<h2 class="mt-4 mb-4">детали заказа №{{ order.id }}</h2>
+<div class="d-flex justify-content-between align-items-center mt-4 mb-4">
+    <h2 class="mb-0">детали заказа №{{ order.id }}</h2>
+    <span class="badge
+        {% if order.status == '✅ доставлено' %}
+            bg-success
+        {% else %}
+            bg-secondary
+        {% endif %}
+    " style="font-size: 1rem; padding: 0.6em 1em;">
+        {{ order.status }}
+    </span>
+</div>
 
 <div class="container">
     <div class="row mb-4">
@@ -12,6 +23,10 @@
             <p><strong>город доставки:</strong> {{ order.city }}</p>
             <p><strong>итоговая сумма:</strong> {{ order.total|format_price }} ₽</p>
             <p><strong>дата заказа:</strong> {{ order.formated_date }}</p>
+
+            {% if order.status == '✅ доставлено' %}
+            <p><strong>дата получения:</strong> {{ order.formated_date_done }}</p>
+            {% endif %}
         </div>
     </div>
 
@@ -59,10 +74,12 @@
 
     <div class="mt-4">
         <a href="{{ url_for('orders') }}" class="btn btn-secondary">назад</a>
+
+        {% if order.status != '✅ доставлено' %}
         <form action="{{ url_for('order_details', order_id=order.id) }}" method="POST" class="d-inline">
             <button type="submit" name="cancel" class="btn btn-danger">отменить заказ</button>
         </form>
-
+        {% endif %}
     </div>
 </div>
 {% endblock %}

@@ -49,6 +49,20 @@ class Orders(db.Model):
     date = db.Column(db.Text)
     formated_date = db.Column(db.Text)
     man_id = db.Column(db.Integer, nullable=False)
+    status = db.Column(db.Text, nullable=False)
+    date_done = db.Column(db.Text)
+    formated_date_done = db.Column(db.Text)
+
+
+class Reviews(db.Model):
+    __tablename__ = 'reviews'
+
+    id = db.Column(db.Integer, primary_key=True)
+    rating = db.Column(db.Integer, nullable=False)
+    text = db.Column(db.Text)
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
+    man_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.now)
 
 
 @app.template_filter('format_price')
@@ -410,7 +424,8 @@ def order():
             products=' '.join(','.join([str(key), str(value)]) for key, value in product_counts.items()),
             date=date,
             formated_date=date.strftime(f"%d {months[date.month - 1]} в %H:%M"),
-            man_id=session['id']
+            man_id=session['id'],
+            status=' ✈️ доставка'
         )
         db.session.add(new_order)
         user.in_cart = ' '.join([p for p in user.in_cart.split() if p not in selected_ids1])
@@ -421,12 +436,23 @@ def order():
                            total=total)
 
 
-@app.route('/orders')
+@app.route('/orders', methods=['GET', 'POST'])
 def orders():
     if 'username' not in session:
         return redirect(url_for('login'))
 
     orders = Orders.query.filter_by(man_id=session['id']).all()
+    if request.method == 'POST' and 'received' in request.form:
+        order_id = request.form.get('order_id')
+        order = Orders.query.filter_by(id=order_id).first()
+
+        date = datetime.now()
+        formated_date = date.strftime(f"%d {months[date.month - 1]} в %H:%M")
+        order.date_done = date
+        order.formated_date_done = formated_date
+        order.status = '✅ доставлено'
+        db.session.commit()
+
     return render_template('orders.html', orders=orders, Products=Products, int=int)
 
 
@@ -449,6 +475,91 @@ def order_details(order_id):
 
     return render_template('about_order.html', order=order, name=user.username, product_counts=product_counts,
                            Products=Products)
+
+
+@app.route('/reviews', methods=['GET', 'POST'])
+def reviews():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    user_id = session['id']
+
+    if request.method == 'POST':
+        if 'product_id' in request.form:
+            product_id = request.form.get('product_id')
+            rating = request.form.get('rating')
+            text = request.form.get('text', '').strip()
+
+            if not product_id or not rating:
+                flash('выберите оценку для товара', 'danger')
+                return redirect(url_for('reviews'))
+
+            new_review = Reviews(
+                rating=rating,
+                text=text,
+                product_id=product_id,
+                man_id=user_id
+            )
+            db.session.add(new_review)
+            db.session.commit()
+            flash('cпасибо за отзыв', 'success')
+
+        elif 'delete_review' in request.form:
+            review_id = request.form.get('review_id')
+            review = Reviews.query.filter_by(id=review_id, man_id=user_id).first()
+
+            if review:
+                db.session.delete(review)
+                db.session.commit()
+                flash('отзыв удален', 'success')
+            else:
+                flash('отзыв не найден', 'danger')
+
+        elif 'product_id_update' in request.form:
+            product_id = request.form.get('product_id_update')
+            rating = request.form.get('rating_update')
+            text = request.form.get('text_update', '').strip()
+
+            product_id = int(product_id)
+            rating = int(rating)
+
+            review = Reviews.query.filter_by(man_id=user_id, product_id=product_id).first()
+
+            if review:
+                review.rating = rating
+                review.text = text
+                db.session.commit()
+                flash('отзыв обновлен', 'success')
+            else:
+                flash('отзыв не найден', 'danger')
+
+        return redirect(url_for('reviews'))
+
+    received_products_ids = set()
+    orders = Orders.query.filter_by(man_id=user_id, status='✅ доставлено').all()
+    for order in orders:
+        for item in order.products.split():
+            pdd, _ = map(int, item.split(','))
+            received_products_ids.add(pdd)
+
+    reviewed_products_ids = {r.product_id for r in Reviews.query.filter_by(man_id=user_id).all()}
+    available_products = Products.query.filter(
+        Products.id.in_(received_products_ids - reviewed_products_ids)
+    ).all()
+
+    user_reviews = []
+    reviews = Reviews.query.filter_by(man_id=user_id).all()
+    for review in reviews:
+        product = Products.query.get(review.product_id)
+        if product:
+            user_reviews.append({
+                'review': review,
+                'product': product
+            })
+
+    return render_template('reviews.html',
+                           available_products=available_products,
+                           user_reviews=user_reviews)
 
 
 @app.route('/register', methods=['GET', 'POST'])

@@ -6,16 +6,32 @@
 <h2 class="mt-4 mb-4">мои заказы</h2>
 
 <div class="list-group">
-    {% for order in orders %}
+    {% for order in orders|reverse %}
     <a href="{{ url_for('order_details', order_id=order.id) }}" class="list-group-item list-group-item-action">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h4 class="mb-0">заказ №{{ order.id }}</h4>
+            <span class="badge
+                {% if order.status == '✅ доставлено' %}
+                    bg-success
+                {% else %}
+                    bg-secondary
+                {% endif %}
+            " style="font-size: 1rem; padding: 0.6em 1em;">
+                {{ order.status }}
+            </span>
+        </div>
+
         <div class="d-flex justify-content-between align-items-start">
             <div>
-                <h5>заказ №{{ order.id }}</h5>
                 <p><strong>город доставки:</strong> {{ order.city }}</p>
-                <p><strong>итоговая сумма:</strong> <span
-                        style="white-space: nowrap;">{{ order.total|format_price }} ₽</span></p>
+                <p><strong>итоговая сумма:</strong>
+                    <span style="white-space: nowrap;">{{ order.total|format_price }} ₽</span>
+                </p>
                 <p><strong>дата заказа:</strong> {{ order.formated_date }}</p>
 
+                {% if order.status == '✅ доставлено' %}
+                <p><strong>дата получения:</strong> {{ order.formated_date_done }}</p>
+                {% endif %}
             </div>
 
             <div class="d-flex flex-wrap justify-content-end">
@@ -27,14 +43,22 @@
                          style="height: 80px; object-fit: contain;">
                     <div class="card-body p-2">
                         <p class="card-text text-center mb-1" style="font-size: 0.85rem;">{{ prod.name }}</p>
-                        <p class="card-text text-center mb-1" style="font-size: 0.85rem;"><span
-                                style="white-space: nowrap;">{{ prod.price|format_price }} ₽/шт</span></p>
+                        <p class="card-text text-center mb-1" style="font-size: 0.85rem;">
+                            <span style="white-space: nowrap;">{{ prod.price|format_price }} ₽/шт</span>
+                        </p>
                         <p class="card-text text-center mb-0" style="font-size: 0.85rem;">кол-во: {{ prod_qty }}</p>
                     </div>
                 </div>
                 {% endfor %}
             </div>
         </div>
+
+        {% if order.status != '✅ доставлено' %}
+        <form method="post" class="mt-2 text-end">
+            <input type="hidden" name="order_id" value="{{ order.id }}">
+            <button type="submit" class="btn btn-success btn-sm" name="received">заказ получен</button>
+        </form>
+        {% endif %}
     </a>
     {% endfor %}
 </div>
