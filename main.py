@@ -96,12 +96,11 @@ def index():
 
 @app.route('/market', methods=['GET', 'POST'])
 def market():
+    if 'username' not in session:
+        return redirect(url_for('login'))
     search_query = request.args.get('search')
     if search_query:
         return redirect(url_for('search', query=search_query))
-
-    if 'username' not in session:
-        return redirect(url_for('login'))
 
     user = User.query.filter_by(id=session['id']).first()
     categories = db.session.query(Products.category).distinct().all()
@@ -373,6 +372,8 @@ def edit_product(product_id):
 
 @app.route('/search/<query>', methods=['GET', 'POST'])
 def search(query):
+    if 'username' not in session:
+        return redirect(url_for('login'))
     query1 = query.strip().lower()
 
     match = re.search(r'id(\d+)', query)
@@ -644,6 +645,8 @@ def orders():
 
 @app.route('/order/<int:order_id>', methods=['GET', 'POST'])
 def order_details(order_id):
+    if 'username' not in session:
+        return redirect(url_for('login'))
     order = Orders.query.get_or_404(order_id)
 
     user = User.query.filter_by(id=order.man_id).first()
@@ -832,8 +835,7 @@ def reviews():
 
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
-    if 'id' not in session:
-        flash('сначала войдите в аккаунт', 'danger')
+    if 'username' not in session:
         return redirect(url_for('login'))
 
     user = User.query.get(session['id'])
@@ -985,6 +987,7 @@ def login():
 def logout():
     session.pop('username', None)
     session.pop('id', None)
+    session.clear()
     flash('вы успешно вышли из системы', 'info')
     return redirect(url_for('index'))
 
