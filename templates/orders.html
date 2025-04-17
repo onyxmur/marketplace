@@ -36,10 +36,22 @@
                 {% if order.status == '✅ доставлен' %}
                 <p><strong>дата получения:</strong> {{ order.formated_date_done }}</p>
                 {% endif %}
+
+                {% set ns = namespace(flag=False) %}
+                {% for product in order.products.split() %}
+                {% set prod_id, prod_qty = product.split(',') %}
+                {% set prod = Products.query.get(int(prod_id)) %}
+                {% if prod.is_delete %}
+                {% set ns.flag = True %}
+                {% endif %}
+                {% endfor %}
+
+                {% if not ns.flag %}
                 <form method="post" class="d-inline">
                     <input type="hidden" name="order_id" value="{{ order.id }}">
                     <button type="submit" name="again" class="btn btn-success">заказать еще раз</button>
                 </form>
+                {% endif %}
             </div>
 
             <div class="d-flex flex-wrap justify-content-end">

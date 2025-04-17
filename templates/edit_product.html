@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>редактирование товара</h2>
+    <form method="POST">
+        <div class="form-group">
+            <label>название</label>
+            <input type="text" class="form-control" name="name" value="{{ product.name }}" required>
+        </div>
+        <div class="form-group">
+            <label>описание</label>
+            <textarea class="form-control" name="description" required>{{ product.description }}</textarea>
+        </div>
+        <div class="form-group">
+            <label>продавец</label>
+            <input type="text" class="form-control" name="owner" value="{{ product.owner }}" required>
+        </div>
+        <div class="form-group">
+            <label>категория</label>
+            <input type="text" class="form-control" name="category" value="{{ product.category }}" required>
+        </div>
+        <div class="form-group">
+            <label>ссылка на изображение</label>
+            <input type="url" class="form-control" name="image_url" value="{{ product.image_url }}">
+        </div>
+        <div class="form-group">
+            <label>цена</label>
+            <input type="number" class="form-control" name="price" value="{{ product.price }}" min="0" required>
+        </div>
+        <button type="submit" class="btn btn-primary">сохранить</button>
+        <a href="{{ url_for('added_products') }}" class="btn btn-secondary">отмена</a>
+    </form>
+</div>
+{% endblock %}

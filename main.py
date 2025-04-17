@@ -1,3 +1,4 @@
+import random
 import re
 from collections import Counter
 from datetime import timedelta, datetime
@@ -48,6 +49,8 @@ class Products(db.Model):  # товар
 
     image_url = db.Column(db.String)
     price = db.Column(db.Integer)
+    man_id = db.Column(db.Integer)
+    is_delete = db.Column(db.Integer)
 
 
 class Orders(db.Model):
@@ -71,8 +74,8 @@ class Reviews(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     rating = db.Column(db.Integer, nullable=False)
     text = db.Column(db.Text)
-    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
-    man_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    product_id = db.Column(db.Integer, nullable=False)
+    man_id = db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now)
 
 
@@ -194,12 +197,14 @@ def product(product_id):
 
     product = Products.query.get_or_404(product_id)
     user = User.query.filter_by(id=session['id']).first()
+    users = User.query.all()
     g = session.get('url_back', [])
 
     cart_items = user.in_cart.split() if user.in_cart else []
     product_counts = dict(Counter(cart_items))
     product_counts = {int(k): int(v) for k, v in product_counts.items()}
     count_in_cart = product_counts.get(product_id, 0)
+    is_owner = product.man_id == user.id
 
     if request.method == 'POST':
         if 'add' in request.form:
@@ -225,6 +230,17 @@ def product(product_id):
             db.session.commit()
             return redirect(url_for('product', product_id=product_id))
 
+        if 'delete_product' in request.form and is_owner:
+            product = Products.query.filter_by(id=product.id, man_id=user.id).first()
+            product.is_delete = 1
+            for us in users:
+                us.in_cart = ' '.join([p for p in user.in_cart.split() if p != str(product_id)])
+                us.liked_products = ' '.join([p for p in user.liked_products.split() if p != str(product_id)])
+
+            db.session.commit()
+            flash('товар успешно удален', 'success')
+            return redirect(url_for('added_products'))
+
         if 'back' in request.form:
             if g[0] == 'market':
                 return redirect(url_for('market',
@@ -233,13 +249,126 @@ def product(product_id):
             elif g[0] == 'search':
                 return redirect(url_for('search', category=g[1], seller=g[2], price_min=g[3],
                                         price_max=g[4], rating_min=g[5], rating_max=g[6], sort=g[7], query=g[8]))
-            elif g[0] == 'likes' or g[0] == 'cart':
+            elif g[0] in ['likes', 'cart', 'added_products']:
                 return redirect(url_for(g[0]))
 
     liked_products = user.liked_products.split() if user.liked_products else []
     liked_products = [int(pid) for pid in liked_products]
 
-    return render_template('product.html', product=product, count_in_cart=count_in_cart, liked_products=liked_products)
+    return render_template('product.html',
+                           product=product,
+                           count_in_cart=count_in_cart,
+                           liked_products=liked_products,
+                           is_owner=is_owner)
+
+
+@app.route('/add_product', methods=['GET', 'POST'])
+def add_product():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        name = request.form.get('name')
+        description = request.form.get('description')
+        owner = request.form.get('owner')
+        category = request.form.get('category')
+        image_url = request.form.get('image_url')
+        price = request.form.get('price', type=int)
+
+        if not all([name, description, owner, category, image_url, price]):
+            flash('заполните все обязательные поля', 'danger')
+            return redirect(url_for('add_product'))
+
+        new_product = Products(
+            name=name,
+            name_lower=name.lower(),
+            description=description,
+            description_lower=description.lower(),
+            rating=round(random.uniform(4.0, 5.0), 1),
+            owner=owner,
+            owner_lower=owner.lower(),
+            category=category,
+            category_lower=category.lower(),
+            image_url=image_url,
+            price=price,
+            man_id=session['id'],
+            is_delete=0
+        )
+
+        db.session.add(new_product)
+        db.session.commit()
+
+        flash('товар успешно добавлен', 'success')
+        return redirect(url_for('product', product_id=new_product.id))
+
+    return render_template('add_product.html')
+
+
+@app.route('/added_products', methods=['GET', 'POST'])
+def added_products():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    user_id = session['id']
+    user = User.query.filter_by(id=session['id']).first()
+    users = User.query.all()
+    print(users)
+    session['url_back'] = ['added_products']
+
+    if request.method == 'POST':
+        if 'delete_product' in request.form:
+            product_id = request.form.get('product_id')
+            product = Products.query.filter_by(id=product_id, man_id=user_id).first()
+
+            if product:
+                product.is_delete = 1
+                for us in users:
+                    us.in_cart = ' '.join([p for p in user.in_cart.split() if p != str(product_id)])
+                    us.liked_products = ' '.join([p for p in user.liked_products.split() if p != str(product_id)])
+                db.session.commit()
+                flash('товар перемещен в архив', 'success')
+
+        elif 'restore_product' in request.form:
+            product_id = request.form.get('product_id')
+            product = Products.query.filter_by(id=product_id, man_id=user_id).first()
+
+            if product:
+                product.is_delete = 0
+                db.session.commit()
+                flash('товар восстановлен из архива', 'success')
+
+        return redirect(url_for('added_products'))
+
+    products = Products.query.filter_by(man_id=user_id).all()
+
+    return render_template('added_products.html', products=products)
+
+
+@app.route('/edit_product/<int:product_id>', methods=['GET', 'POST'])
+def edit_product(product_id):
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    product = Products.query.filter_by(id=product_id, man_id=session['id']).first_or_404()
+
+    if request.method == 'POST':
+        product.name = request.form['name']
+        product.description = request.form['description']
+        product.owner = request.form['owner']
+        product.category = request.form['category']
+        product.image_url = request.form['image_url']
+        product.price = int(request.form['price'])
+
+        product.name_lower = product.name.lower()
+        product.description_lower = product.description.lower()
+        product.owner_lower = product.owner.lower()
+        product.category_lower = product.category.lower()
+
+        db.session.commit()
+        flash('товар успешно обновлен', 'success')
+        return redirect(url_for('added_products'))
+
+    return render_template('edit_product.html', product=product)
 
 
 @app.route('/search/<query>', methods=['GET', 'POST'])
@@ -400,10 +529,17 @@ def cart():
             session['selected_products'] = selected_products
             flash('выбранные товары сохранены', 'success')
 
-        elif 'likeit' in request.form:
-            print(123)
-            product_id = request.form.get('product_id')
-            return redirect(url_for('toggle_like', product_id=product_id))
+
+        elif 'like_product' in request.form:
+            product_id = request.form['like_product']
+            user = User.query.filter_by(id=session['id']).first()
+            liked = user.liked_products.split() if user.liked_products else []
+            if product_id in liked:
+                liked.remove(product_id)
+            else:
+                liked.append(product_id)
+            user.liked_products = ' '.join(liked)
+            db.session.commit()
 
         db.session.commit()
         return redirect(url_for('cart'))
@@ -542,8 +678,16 @@ def order_details(order_id):
     liked_products = user.liked_products.split() if user.liked_products else []
     liked_products = [int(pid) for pid in liked_products]
 
+    flag = False
+    for product_id, quantity in product_counts.items():
+        product = Products.query.get(product_id)
+        if product.is_delete:
+            flag = True
+            pass
+    print(flag)
+
     return render_template('about_order.html', order=order, name=user.username, product_counts=product_counts,
-                           Products=Products, liked_products=liked_products, number=user.phone_number)
+                           Products=Products, liked_products=liked_products, number=user.phone_number, flag=flag)
 
 
 @app.route('/likes', methods=['GET', 'POST'])
@@ -695,6 +839,20 @@ def settings():
     user = User.query.get(session['id'])
 
     if request.method == 'POST':
+        if 'delete_account' in request.form:
+            delete_password = request.form['delete_password']
+            if not check_password_hash(user.password, delete_password):
+                flash('неверный пароль, аккаунт не удален', 'danger')
+                return redirect(url_for('settings'))
+
+            db.session.delete(user)
+            Orders.query.filter_by(man_id=user.id).delete()
+            Reviews.query.filter_by(man_id=user.id).delete()
+            db.session.commit()
+            session.clear()
+            flash('аккаунт успешно удален', 'success')
+            return redirect(url_for('index'))
+
         username = request.form['username']
         email = request.form['email']
         phone_number = request.form['phone_number']

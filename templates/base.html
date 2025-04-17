@@ -16,7 +16,7 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
-        <a class="navbar-brand" href="{{ url_for('market') }}">маркетплейс</a>
+        <a class="navbar-brand fs-4" href="{{ url_for('market') }}">маркетплейс</a>
 
         <form class="d-flex ms-4" method="GET" action="{{ url_for('market') }}">
             <input class="form-control me-2" type="search" name="search" value="{{ query }}"
@@ -25,20 +25,24 @@
             <button class="btn btn-outline-light" type="submit">поиск</button>
         </form>
 
-        <div class="navbar-nav ms-auto">
+        <div class="navbar-nav ms-auto align-items-center">
             {% if 'username' in session %}
-            <span class="navbar-text me-3">привет, {{ session['username'] }}!  </span>
-            <a class="nav-link" href="{{ url_for('logout') }}">выйти </a>
-            <a class="nav-link" href="{{ url_for('settings') }}">настройки </a>
-            <a class="nav-link" href="{{ url_for('likes') }}">избранное</a>
-            <a class="nav-link" href="{{ url_for('reviews') }}">отзывы</a>
-            <a class="nav-link" href="{{ url_for('orders') }}">заказы</a>
-            <a class="nav-link" href="{{ url_for('cart') }}">корзина</a>
+            <span class="navbar-text text-white me-3 fs-6">
+        привет, {{ session['username'] }}!
+    </span>
+            <a class="nav-link fs-6 px-3" href="{{ url_for('logout') }}">выйти</a>
+            <a class="nav-link fs-5 px-3" href="{{ url_for('settings') }}">⚙️</a>
+            <a class="nav-link fs-5 px-3" href="{{ url_for('added_products') }}">➕</a>
+            <a class="nav-link fs-5 px-3" href="{{ url_for('likes') }}">❤️</a>
+            <a class="nav-link fs-5 px-3" href="{{ url_for('reviews') }}">⭐</a>
+            <a class="nav-link fs-5 px-3" href="{{ url_for('orders') }}">📦</a>
+            <a class="nav-link fs-5 px-3" href="{{ url_for('cart') }}">🛒</a>
             {% else %}
-            <a class="nav-link" href="{{ url_for('login') }}">войти</a>
-            <a class="nav-link" href="{{ url_for('register') }}">регистрация</a>
+            <a class="nav-link px-3" href="{{ url_for('login') }}">войти</a>
+            <a class="nav-link px-3" href="{{ url_for('register') }}">регистрация</a>
             {% endif %}
         </div>
+
     </div>
 </nav>
 

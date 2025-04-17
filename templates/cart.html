@@ -46,7 +46,8 @@
                                 <h5 class="fw-bold mb-0">{{ product.name }}</h5>
                             </a>
                             <input type="hidden" name="product_id" value="{{ product.id }}">
-                            <button type="submit" name="likeit" class="btn border-0 p-0 bg-transparent ms-2">
+                            <button type="submit" name="like_product" value="{{ product.id }}"
+                                    class="btn border-0 p-0 bg-transparent ms-2">
                                 {% if product.id in liked_products %}
                                 <i class="bi bi-heart-fill text-danger fs-4"></i>
                                 {% else %}

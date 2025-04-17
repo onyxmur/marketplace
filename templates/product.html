@@ -8,11 +8,11 @@
                  class="card-img-top"
                  alt="{{ product.name }}"
                  style="height: 300px; object-fit: contain; border-radius: 10px;">
-
         </div>
         <div class="col-md-6">
             <div class="d-flex align-items-center">
-                <h1 class="display-4 mb-0 me-3">{{ product.name }}</h1>
+                <h1 class="display-4 mb-0 me-3">{% if product.is_delete %}(товар больше не доступен) {% endif %}{{
+                    product.name }}</h1>
                 <form method="POST" action="{{ url_for('toggle_like', product_id=product.id) }}">
                     <button type="submit" class="btn border-0 p-0 bg-transparent">
                         {% if product.id in liked_products %}
@@ -31,7 +31,7 @@
             <p><strong>категория:</strong> {{ product.category }}</p>
             <p><strong>рейтинг:</strong> {{ product.rating }}</p>
             <p><strong>id:</strong> {{ product.id }}</p>
-
+            {% if not product.is_delete %}
             <form action="{{ url_for('product', product_id=product.id) }}" method="POST">
                 {% if count_in_cart > 0 %}
                 <div class="d-flex align-items-center gap-3">
@@ -45,13 +45,30 @@
                     <button type="submit" name="add" class="btn btn-primary btn-lg">добавить в корзину</button>
                 </div>
                 {% endif %}
-                <div class="d-flex justify-content-between mt-4">
+            </form>
+
+            {% if is_owner %}
+            <div class="d-flex gap-2 mt-3">
+                <a href="{{ url_for('edit_product', product_id=product.id) }}" class="btn btn-warning btn-lg">
+                    редактировать товар
+                </a>
+                <form method="POST" action="{{ url_for('product', product_id=product.id) }}"
+                      onsubmit="return confirm('Вы уверены, что хотите удалить этот товар?');">
+                    <button type="submit" name="delete_product" class="btn btn-danger btn-lg">
+                        удалить товар
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+            {% endif %}
+
+            <div class="d-flex justify-content-between mt-4">
+                <form method="POST" action="{{ url_for('product', product_id=product.id) }}">
                     <button type="submit" name="back" class="btn btn-outline-success btn-lg shadow-lg rounded-4">
                         назад
                     </button>
-                </div>
-            </form>
-
+                </form>
+            </div>
         </div>
     </div>
 </div>

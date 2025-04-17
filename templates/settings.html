@@ -34,5 +34,15 @@
         </div>
         <button type="submit" class="btn btn-primary">сохранить изменения</button>
     </form>
+    <hr>
+    <h5 class="text-danger">удалить аккаунт</h5>
+    <form method="POST" onsubmit="return confirm('вы уверены, что хотите удалить аккаунт?');">
+        <div class="mb-3">
+            <label for="delete_password" class="form-label">введите пароль для подтверждения</label>
+            <input type="password" class="form-control" id="delete_password" name="delete_password" required>
+        </div>
+        <button type="submit" class="btn btn-danger" name="delete_account" value="1">удалить аккаунт</button>
+    </form>
+
 </div>
 {% endblock %}

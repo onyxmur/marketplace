@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>добавить новый товар</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="name">название товара</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="description">описание</label>
+            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="owner">название продавца</label>
+            <input type="text" class="form-control" id="owner" name="owner" required>
+        </div>
+
+        <div class="form-group">
+            <label for="category">категория</label>
+            <input type="text" class="form-control" id="category" name="category" required>
+        </div>
+
+        <div class="form-group">
+            <label for="image_url">ссылка на изображение</label>
+            <input type="url" class="form-control" id="image_url" name="image_url" min="1" required>
+        </div>
+
+        <div class="form-group">
+            <label for="price">цена в рублях</label>
+            <input type="number" class="form-control" id="price" name="price" min="1" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">добавить товар</button>
+    </form>
+</div>
+{% endblock %}

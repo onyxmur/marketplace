@@ -53,6 +53,7 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-2">
                         <h5 class="card-title mb-0">{{ product.name }}</h5>
+                        {% if not product.is_delete %}
                         <form method="POST" action="{{ url_for('toggle_like', product_id=product.id) }}" class="ms-2">
                             <button type="submit" class="btn border-0 p-0 bg-transparent">
                                 {% if product.id in liked_products %}
@@ -62,6 +63,7 @@
                                 {% endif %}
                             </button>
                         </form>
+                        {% endif %}
                     </div>
                     <p class="card-text">цена за шт: {{ product.price|format_price }} ₽</p>
                     <p class="card-text">кол-во: {{ quantity }}</p>
@@ -103,9 +105,11 @@
             <button type="submit" name="cancel" class="btn btn-danger">отменить заказ</button>
         </form>
         {% endif %}
+        {% if not flag %}
         <form method="POST" class="d-inline">
             <button type="submit" name="again" class="btn btn-success">заказать еще раз</button>
         </form>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

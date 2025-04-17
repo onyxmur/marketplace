@@ -64,6 +64,7 @@
     {% if products %}
     <div class="row mt-4">
         {% for product in products %}
+        {% if not product.is_delete %}
         <div class="col-md-4 mb-4">
             <div class="card h-100">
                 <a href="{{ url_for('product', product_id=product.id) }}" class="text-decoration-none text-dark">
@@ -133,6 +134,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
         {% endfor %}
     </div>
     {% else %}
