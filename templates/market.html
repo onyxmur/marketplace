@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+
 <div class="container mt-4">
     <h2>добро пожаловать на маркетплейс</h2>
 
@@ -76,13 +77,27 @@
                     <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}"
                          style="height: 200px; object-fit: contain;">
                     <div class="card-body">
-                        <h5 class="card-title">{{ product.name }}</h5>
+                        <h5 class="card-title">
+                            {{ product.name }}
+                            <form method="POST" action="{{ url_for('toggle_like', product_id=product.id) }}"
+                                  class="d-inline ms-2">
+                                <button type="submit" class="btn border-0 p-0 bg-transparent">
+                                    {% if product.id in liked_products %}
+                                    <i class="bi bi-heart-fill text-danger fs-4"></i>
+                                    {% else %}
+                                    <i class="bi bi-heart text-secondary fs-4"></i>
+                                    {% endif %}
+                                </button>
+                            </form>
+                        </h5>
+
                         <h4 class="text-primary"><span
                                 style="white-space: nowrap;">{{ product.price|format_price }} ₽</span></h4>
                         <p class="card-text"><strong>продавец:</strong> {{ product.owner }}</p>
                         <p class="card-text"><strong>категория:</strong> {{ product.category }}</p>
                         <p class="card-text"><strong>рейтинг:</strong> {{ product.rating }}</p>
                     </div>
+
                 </a>
                 <div class="card-footer">
                     {% if product.id in product_counts %}

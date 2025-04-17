@@ -7,12 +7,16 @@
 
 <div class="list-group">
     {% for order in orders|reverse %}
-    <a href="{{ url_for('order_details', order_id=order.id) }}" class="list-group-item list-group-item-action">
+    <a href="{{ url_for('order_details', order_id=order.id) }}"
+       class="list-group-item list-group-item-action {% if order.status == '❌ отменен' %}opacity-75{% endif %}">
+
         <div class="d-flex justify-content-between align-items-center mb-2">
             <h4 class="mb-0">заказ №{{ order.id }}</h4>
             <span class="badge
-                {% if order.status == '✅ доставлено' %}
+                {% if order.status == '✅ доставлен' %}
                     bg-success
+                 {% elif order.status == '❌ отменен' %}
+                    bg-danger
                 {% else %}
                     bg-secondary
                 {% endif %}
@@ -29,9 +33,13 @@
                 </p>
                 <p><strong>дата заказа:</strong> {{ order.formated_date }}</p>
 
-                {% if order.status == '✅ доставлено' %}
+                {% if order.status == '✅ доставлен' %}
                 <p><strong>дата получения:</strong> {{ order.formated_date_done }}</p>
                 {% endif %}
+                <form method="post" class="d-inline">
+                    <input type="hidden" name="order_id" value="{{ order.id }}">
+                    <button type="submit" name="again" class="btn btn-success">заказать еще раз</button>
+                </form>
             </div>
 
             <div class="d-flex flex-wrap justify-content-end">
@@ -53,7 +61,7 @@
             </div>
         </div>
 
-        {% if order.status != '✅ доставлено' %}
+        {% if order.status == '✈️ доставка'%}
         <form method="post" class="mt-2 text-end">
             <input type="hidden" name="order_id" value="{{ order.id }}">
             <button type="submit" class="btn btn-success btn-sm" name="received">заказ получен</button>

@@ -8,9 +8,21 @@
                  class="card-img-top"
                  alt="{{ product.name }}"
                  style="height: 300px; object-fit: contain; border-radius: 10px;">
+
         </div>
         <div class="col-md-6">
-            <h1 class="display-4">{{ product.name }}</h1>
+            <div class="d-flex align-items-center">
+                <h1 class="display-4 mb-0 me-3">{{ product.name }}</h1>
+                <form method="POST" action="{{ url_for('toggle_like', product_id=product.id) }}">
+                    <button type="submit" class="btn border-0 p-0 bg-transparent">
+                        {% if product.id in liked_products %}
+                        <i class="bi bi-heart-fill text-danger fs-1"></i>
+                        {% else %}
+                        <i class="bi bi-heart text-secondary fs-1"></i>
+                        {% endif %}
+                    </button>
+                </form>
+            </div>
             <h3 class="text-primary my-3">
                 <span style="white-space: nowrap;">{{ product.price|format_price }} ₽</span>
             </h3>

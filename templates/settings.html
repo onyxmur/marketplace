@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}настройки профиля{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>настройки профиля</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="username" class="form-label">имя пользователя</label>
+            <input type="text" class="form-control" id="username" name="username" value="{{ user.username }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">почта</label>
+            <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="phone_number" class="form-label">номер телефона</label>
+            <input type="text" class="form-control" id="phone_number" name="phone_number"
+                   value="{{ user.phone_number }}" required>
+        </div>
+        <hr>
+        <h5>смена пароля</h5>
+        <div class="mb-3">
+            <label for="current_password" class="form-label">текущий пароль</label>
+            <input type="password" class="form-control" id="current_password" name="current_password">
+        </div>
+        <div class="mb-3">
+            <label for="new_password" class="form-label">новый пароль</label>
+            <input type="password" class="form-control" id="new_password" name="new_password">
+        </div>
+        <div class="mb-3">
+            <label for="new_password_confirm" class="form-label">повторите новый пароль</label>
+            <input type="password" class="form-control" id="new_password_confirm" name="new_password_confirm">
+        </div>
+        <button type="submit" class="btn btn-primary">сохранить изменения</button>
+    </form>
+</div>
+{% endblock %}

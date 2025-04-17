@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>избранные товары</h2>
+    <div class="row mt-4">
+        {% if products|length == 0 %}
+        <div class="col-12">
+            <div class="alert alert-info text-center">нет избранных товаров</div>
+        </div>
+        {% else %}
+        {% for product in products %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="position-absolute p-2" style="right: 0; z-index: 2;">
+                    <form method="POST" class="d-inline">
+                        <input type="hidden" name="product_id" value="{{ product.id }}">
+                        <button name="unlike" value="{{ product.id }}" type="submit" class="btn btn-link p-0 border-0">
+                            <i class="fa-solid fa-heart text-danger fs-4"></i>
+                        </button>
+                    </form>
+                </div>
+                <a href="{{ url_for('product', product_id=product.id) }}" class="text-decoration-none text-dark">
+                    <img src="{{ product.image_url }}" class="card-img-top" style="height: 200px; object-fit: contain;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <h4 class="text-primary"><span
+                                style="white-space: nowrap;">{{ product.price|format_price }} ₽</span></h4>
+                        <p class="card-text"><strong>продавец:</strong> {{ product.owner }}</p>
+                        <p class="card-text"><strong>категория:</strong> {{ product.category }}</p>
+                        <p class="card-text"><strong>рейтинг:</strong> {{ product.rating }}</p>
+                        <form method="POST" action="{{ url_for('toggle_like', product_id=product.id) }}">
+                                <button type="submit" class="btn border-0 p-0 bg-transparent">
+                                    <i class="bi bi-heart-fill text-danger fs-4"></i>
+                                </button>
+                            </form>
+
+                    </div>
+                </a>
+                <div class="card-footer">
+                    {% if product.id in product_counts %}
+                    <div class="d-flex align-items-center justify-content-between">
+                        <form method="POST" class="d-inline">
+                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                            <button name="decrease" value="{{ product.id }}" type="submit"
+                                    class="btn btn-outline-secondary">-
+                            </button>
+                        </form>
+
+                        <span>{{ product_counts[product.id] }} шт.</span>
+
+                        <form method="POST" class="d-inline">
+                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                            <button name="increase" value="{{ product.id }}" type="submit"
+                                    class="btn btn-outline-secondary">+
+                            </button>
+                        </form>
+
+                        <form method="POST" class="d-inline">
+                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                            <button name="remove" value="{{ product.id }}" type="submit" class="btn btn-outline-danger">
+                                &times;
+                            </button>
+                        </form>
+                    </div>
+                    {% else %}
+                    <form method="POST">
+                        <input type="hidden" name="product_id" value="{{ product.id }}">
+                        <button type="submit" name="increase" value="{{ product.id }}" class="btn btn-primary w-100">
+                            добавить в корзину
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

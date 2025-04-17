@@ -9,7 +9,6 @@
     <h1 class="mb-0">корзина</h1>
 </div>
 
-
 <form method="POST" action="{{ url_for('cart') }}">
     <div class="d-flex justify-content-between mt-4">
         <button type="submit" name="save_selected" class="btn btn-outline-success btn-lg shadow-lg rounded-4">
@@ -19,6 +18,7 @@
             удалить выбранное
         </button>
     </div>
+
     <div class="row gy-4">
         {% for product in products %}
         <div class="col-12">
@@ -33,12 +33,27 @@
                         </label>
                     </div>
                     <div class="col-md-2 text-center p-2">
-                        <img src="{{ product.image_url }}" alt="{{ product.name }}"
-                             class="img-fluid rounded-3"
-                             style="height: 170px; object-fit: cover;">
+                        <a href="{{ url_for('product', product_id=product.id) }}">
+                            <img src="{{ product.image_url }}" alt="{{ product.name }}"
+                                 class="img-fluid rounded-3"
+                                 style="height: 170px; object-fit: cover;">
+                        </a>
                     </div>
                     <div class="col-md-5 p-3">
-                        <h5 class="fw-bold">{{ product.name }}</h5>
+                        <div class="d-flex align-items-center mb-2">
+                            <a href="{{ url_for('product', product_id=product.id) }}"
+                               class="text-decoration-none text-dark">
+                                <h5 class="fw-bold mb-0">{{ product.name }}</h5>
+                            </a>
+                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                            <button type="submit" name="likeit" class="btn border-0 p-0 bg-transparent ms-2">
+                                {% if product.id in liked_products %}
+                                <i class="bi bi-heart-fill text-danger fs-4"></i>
+                                {% else %}
+                                <i class="bi bi-heart text-secondary fs-4"></i>
+                                {% endif %}
+                            </button>
+                        </div>
                         <p class="text-muted small mb-2">{{ product.description }}</p>
                         <p class="mb-0">цена за штуку: <strong><span style="white-space: nowrap;">{{ product.price|format_price }} ₽</span></strong>
                         </p>
@@ -76,7 +91,6 @@
             оформить заказ на выбранное
         </button>
     </div>
-
 
     <div class="d-flex justify-content-end mt-4">
         <div class="fw-bold fs-4">
