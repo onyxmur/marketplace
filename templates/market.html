@@ -23,7 +23,7 @@
                 <label for="seller_filter" class="form-label">фильтр по продавцу</label>
                 <select id="seller_filter" name="seller" class="form-select" onchange="this.form.submit()">
                     <option value="">все продавцы</option>
-                    {% for seller in owners %}
+                    {% for seller in sellers %}
                     <option value="{{ seller }}" {% if seller== selected_seller %}selected{% endif %}>{{ seller }}
                     </option>
                     {% endfor %}
@@ -104,7 +104,7 @@
                     {% if product.id in product_counts %}
                     <div class="d-flex align-items-center justify-content-between">
                         <form method="POST"
-                              action="{{ url_for('market', category=selected_category, seller=selected_seller, price_min=price_min, price_max=price_max, rating_min=rating_min, rating_max=rating_max, sort=sort_filter) }}"
+                              action="{{ url_for('market', category=selected_category, seller=selected_seller, price_min=price_min, price_max=price_max, rating_min=rating_min, sort=sort_filter) }}"
                               class="d-inline">
                             <input type="hidden" name="product_id" value="{{ product.id }}">
                             <button name="decrease" value="{{ product.id }}" type="submit"
@@ -115,7 +115,7 @@
                         <span>{{ product_counts[product.id] }} шт.</span>
 
                         <form method="POST"
-                              action="{{ url_for('market', category=selected_category, seller=selected_seller, price_min=price_min, price_max=price_max, rating_min=rating_min, rating_max=rating_max, sort=sort_filter) }}"
+                              action="{{ url_for('market', category=selected_category, seller=selected_seller, price_min=price_min, price_max=price_max, rating_min=rating_min, sort=sort_filter) }}"
                               class="d-inline">
                             <input type="hidden" name="product_id" value="{{ product.id }}">
                             <button name="increase" value="{{ product.id }}" type="submit"
@@ -124,7 +124,7 @@
                         </form>
 
                         <form method="POST"
-                              action="{{ url_for('market', category=selected_category, seller=selected_seller, price_min=price_min, price_max=price_max, rating_min=rating_min, rating_max=rating_max, sort=sort_filter) }}"
+                              action="{{ url_for('market', category=selected_category, seller=selected_seller, price_min=price_min, price_max=price_max, rating_min=rating_min, sort=sort_filter) }}"
                               class="d-inline">
                             <input type="hidden" name="product_id" value="{{ product.id }}">
                             <button name="remove" value="{{ product.id }}" type="submit" class="btn btn-outline-danger">
@@ -134,7 +134,7 @@
                     </div>
                     {% else %}
                     <form method="POST"
-                          action="{{ url_for('market', category=selected_category, seller=selected_seller, price_min=price_min, price_max=price_max, rating_min=rating_min, rating_max=rating_max, sort=sort_filter) }}">
+                          action="{{ url_for('market', category=selected_category, seller=selected_seller, price_min=price_min, price_max=price_max, rating_min=rating_min, sort=sort_filter) }}">
                         <input type="hidden" name="product_id" value="{{ product.id }}">
                         <button type="submit" class="btn btn-primary w-100">добавить в корзину</button>
                     </form>

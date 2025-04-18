@@ -24,7 +24,7 @@
                 <label for="seller_filter" class="form-label">продавец</label>
                 <select id="seller_filter" name="seller" class="form-select" onchange="this.form.submit()">
                     <option value="">все продавцы</option>
-                    {% for seller in owners %}
+                    {% for seller in sellers %}
                     <option value="{{ seller }}" {% if seller== selected_seller %}selected{% endif %}>{{ seller }}
                     </option>
                     {% endfor %}
